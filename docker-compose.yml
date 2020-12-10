@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+    app:
+        image: sonar-analyzer
+        build:
+            dockerfile: ./Dockerfile
+            context: .
+        environment:
+            - PORT=${PORT}
+        ports:
+            - ${PORT}:${PORT}
