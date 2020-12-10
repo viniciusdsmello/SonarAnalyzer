@@ -9,7 +9,7 @@ Sonar Analyzer is a tool developed by the Researchers of the Signal Processing L
 # Running Locally
 To run this application locally you must create a virtual environment, then install streamlit and run the following command:
 ```bash
-$ pip install streamlit
+$ pip install streamlit==0.72.0
 $ streamlit run https://github.com/viniciusdsmello/SonarAnalyzer.git
 ``` 
 
