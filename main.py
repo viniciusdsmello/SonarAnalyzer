@@ -17,10 +17,6 @@ def main(state=None):
     st.set_page_config(page_title="Sonar Analyzer", layout="centered")
     readme_text = st.markdown(get_file_content_as_string("docs/instructions.md"))
 
-    # Download external dependencies.
-    # for filename in EXTERNAL_DEPENDENCIES.keys():
-    #    download_file(filename)
-
     # Once we have the dependencies, add a selector for the app mode on the sidebar.
     st.sidebar.title("What to do")
     current_page = st.sidebar.selectbox("Menu",
