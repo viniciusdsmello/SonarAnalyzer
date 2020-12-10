@@ -17,8 +17,7 @@ def main(state=None):
     st.set_page_config(page_title="Sonar Analyzer", layout="centered")
     readme_text = st.markdown(get_file_content_as_string("docs/instructions.md"))
 
-    # Once we have the dependencies, add a selector for the app mode on the sidebar.
-    st.sidebar.title("What to do")
+    st.sidebar.header("Sonar Analyzer")
     current_page = st.sidebar.selectbox("Menu",
         ["Home"] + list(PAGE_MAP))
     

@@ -1,13 +1,16 @@
+import logging
 from enum import Enum
 from io import BytesIO, StringIO
 from typing import Union
 
+import soundfile as sf
 import streamlit as st
 from scipy.io.wavfile import read, write
+
 from src.utils import Page
 from src.utils.files import file_selector
 
-import soundfile as sf
+from src.preprocessing import LofarAnalysis
 
 STYLE = """
 <style>
@@ -45,6 +48,9 @@ def get_file_type(file: Union[BytesIO, StringIO]) -> FileType:
 class AudioAnalysis(Page):
     def __init__(self, state):
         self.state = state
+        self.files_data = {}
+        self.classes = {}
+        self.number_of_classes = None
     
     def _read_wav(self, file: BytesIO):
         rate = None
@@ -53,16 +59,23 @@ class AudioAnalysis(Page):
         if file_type == FileType.WAV:
             try:
                 rate, data = read(file)
-                file.close()
-            except:
-                pass
+            except Exception as e:
+                logging.error(f"Error while reading wav file - {str(e)}")
         else:
             st.error("Invalid extention, please upload a wav file!")
         return rate, data
 
+    def _run_lofar_analysis(self, **kwargs):
+        lofar = LofarAnalysis()
+        
+    def _run_demon_analysis(self, **kwargs):
+        demon = DemonAnalysis()
+
     def write(self):
         st.title("Audio Analysis")
-
+        st.markdown("""
+        Please, select the .wav files above, then in the sidebar select the analysis that should be performed.
+        """)
         files = st.file_uploader("Upload file", type=FILE_TYPES, accept_multiple_files=True)
         show_file = st.empty()
         if not files:
@@ -73,14 +86,68 @@ class AudioAnalysis(Page):
             files = [files]
         try:
             for file in files:
-                rate, date = self._read_wav(file)
-                st.write(f"File: {file.name}")
-                st.write(f"Rate: {rate}")
-                st.write(f"------")
-        except Exception:
-            for file in files:
-                file.close()
+                rate, data = self._read_wav(file)
+                self.files_data.update(
+                    {
+                        file.name: {
+                            "rate": rate,
+                            "data": data
+                        }
+                    }
+                )
+        except Exception as e:
+            logging.error(f"Error while reading processing files - {str(e)}")
+        
+        self.number_of_classes = st.number_input("How many classes?", format='%d', value=0, step=1)
 
-        st.title("Lofar Analysis")
+        self.classes = {}
+        if self.number_of_classes:
+            for i in range(self.number_of_classes):
+                class_label = st.text_input(label=f"Insert a Label for the #{i+1} class", key=f"class_label_{i}")
+                class_files = st.multiselect(label="Select files to add to this class",
+                                             options=[file.name for file in files],
+                                             key=f"class_files_{i}")
+                               
+                self.classes.update(
+                    {
+                        f"class_{class_label}": {
+                            "index": i,
+                            "files": class_files
+                        }
+                    }
+                )
 
-        # self.state.client_config["audio_filename"] = filename
+        self.write_sidebar()
+
+    def write_sidebar(self):
+        st.sidebar.write("Options:")
+        if st.sidebar.button('Lofar Analysis'):
+            st.sidebar.write("Lofar Settings:")
+            self.state.client_config["lofar_decimation_rate"] = st.sidebar.slider(
+                label="Decimation Rate",
+                min_value=0,
+                value=self.state.client_config.get("lofar_decimation_rate", 3)
+            )
+            self.state.client_config["lofar_fft_points"] = st.sidebar.slider(
+                label="FFT Points",
+                min_value=1,
+                value=self.state.client_config.get("lofar_fft_points", 400)
+            )
+            for c in self.classes:
+                st.title(f"Lofar Analysis - {c}")
+                for filename in self.classes[c].get('files'):
+                    st.write(f"File: {filename}")
+                    st.write(f"Decimation Rate: {decimation_rate}")
+                    st.write(f"FFT Points: {fft_points}")
+                    file_data = self.files_data[filename]
+                    logging.info("Running Lofar Analysis...")
+
+        if st.sidebar.button('Demon Analysis'):
+            for c in classes:
+                st.title(f"Demon Analysis - {c}")
+                for filename in classes[c].get('files'): 
+                    st.write(f"File: {filename}")
+                    st.write(f"Decimation Rate: {decimation_rate}")
+                    st.write(f"FFT Points: {fft_points}")
+                    file_data = self.files_data[filename]                
+                    logging.info("Running Lofar Analysis...")
