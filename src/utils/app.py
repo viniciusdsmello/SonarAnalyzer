@@ -1,5 +1,7 @@
 import os
 
+import streamlit as st
+
 from streamlit.report_thread import get_report_ctx
 from streamlit.hashing import _CodeHasher
 from streamlit.server.server import Server
@@ -83,6 +85,7 @@ def _get_session():
 
     return session_info.session
 
+
 def get_state(hash_funcs=None):
     session = _get_session()
 
@@ -91,8 +94,10 @@ def get_state(hash_funcs=None):
 
     return session._custom_session_state
 
+
 # Only used for separating namespace, everything can be saved at state variable as well.
 CONFIG_DEFAULTS: Dict[str, Any] = {"slider_value": 0}
+
 
 def provide_state(hash_funcs=None):
     def inner(func):
@@ -109,7 +114,7 @@ def provide_state(hash_funcs=None):
     return inner
 
 
-# @st.cache
+@st.cache
 def get_file_content_as_string(path: str) -> str:
     content = ''
     with open(path, 'r') as f:

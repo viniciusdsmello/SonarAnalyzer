@@ -29,5 +29,5 @@ $ docker build . -t sonar-analyzer
 Then use docker compose to start the container:
 
 ```bash
-docker-compose up
+docker-compose up --build
 ```

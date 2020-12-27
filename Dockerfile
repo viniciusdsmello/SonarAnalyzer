@@ -8,11 +8,14 @@ RUN apt-get update \
 	&& apt-get upgrade -y \
 	&& apt-get -y install apt-utils gcc libpq-dev libsndfile-dev
 
-RUN pip install -r requirements.txt
-
 COPY src ./src
+
 COPY docs ./docs
 
+COPY setup.py ./setup.py
+
 COPY main.py ./main.py
+
+RUN python setup.py install
 
 CMD ["sh", "-c", "streamlit run --server.port $PORT /usr/app/src/main.py"]
